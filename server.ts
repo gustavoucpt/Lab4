@@ -4,6 +4,7 @@
  */
 import i18n from 'i18n'
 import cors from 'cors'
+import rateLimit from 'express-rate-limit'
 import fs from 'node:fs'
 import yaml from 'js-yaml'
 import config from 'config'
@@ -660,7 +661,11 @@ restoreOverwrittenFilesWithOriginals().then(() => {
 
   /* Route for vulnerable code snippets */
   app.get('/snippets/:challenge', serveCodeSnippet())
-  app.post('/snippets/verdict', checkVulnLines())
+  const verdictLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 100 // Limita cada IP a 100 pedidos por janela
+  })
+  app.post('/snippets/verdict', verdictLimiter, checkVulnLines())
   app.get('/snippets/fixes/:key', serveCodeFixes())
   app.post('/snippets/fixes', checkCorrectFix())
 
