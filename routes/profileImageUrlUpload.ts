@@ -16,7 +16,21 @@ import logger from '../lib/logger'
 export function profileImageUrlUpload () {
   return async (req: Request, res: Response, next: NextFunction) => {
     if (req.body.imageUrl !== undefined) {
-      const url = req.body.imageUrl
+      // --- INÍCIO DA CORREÇÃO (FIX) ---
+        // Validar se é um URL bem formado e se usa HTTP/HTTPS
+        try {
+          const validUrl = new URL(req.body.imageUrl);
+          if (validUrl.protocol !== 'http:' && validUrl.protocol !== 'https:') {
+             res.status(400).send('Protocol not allowed');
+             return;
+          }
+        } catch (err) {
+           res.status(400).send('Invalid URL format');
+           return;
+        }
+        // --- FIM DA CORREÇÃO ---
+
+	const url = req.body.imageUrl
       if (url.match(/(.)*solve\/challenges\/server-side(.)*/) !== null) req.app.locals.abused_ssrf_bug = true
       const loggedInUser = security.authenticatedUsers.get(req.cookies.token)
       if (loggedInUser) {
