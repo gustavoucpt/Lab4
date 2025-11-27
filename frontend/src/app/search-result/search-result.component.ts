@@ -154,6 +154,7 @@ export class SearchResultComponent implements OnDestroy, AfterViewInit {
     let queryParam: string = this.route.snapshot.queryParams.q
     if (queryParam) {
       queryParam = queryParam.trim()
+	queryParam = queryParam.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       this.ngZone.runOutsideAngular(() => { // vuln-code-snippet hide-start
         this.io.socket().emit('verifyLocalXssChallenge', queryParam)
       }) // vuln-code-snippet hide-end
